@@ -11,6 +11,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+# Larger fonts for thesis readability
+plt.rcParams.update({
+    "font.size": 20,
+    "axes.titlesize": 23,
+    "axes.labelsize": 21,
+    "xtick.labelsize": 18,
+    "ytick.labelsize": 18,
+    "legend.fontsize": 18,
+})
+
 # ── Configuration ────────────────────────────────────────────────────────────
 BASE = Path(__file__).resolve().parent.parent.parent / "tmp_out" / "evobots" / "evobots"
 OUT  = Path(__file__).resolve().parent.parent.parent / "tmp_out" / "plots"
@@ -104,7 +114,7 @@ def plot_fitness_curves():
     bas_best, bas_mean = _load_fitness_per_gen(BASELINE_RUNS)
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 5), sharey=False)
-    fig.suptitle("Fitness Across Generations: Improved vs Baseline", fontsize=13, fontweight="bold")
+    fig.suptitle("Fitness Across Generations: Evolved vs Fixed Controller", fontsize=25, fontweight="bold")
 
     for ax, imp_d, bas_d, title in [
         (axes[0], imp_best, bas_best, "Best fitness per generation"),
@@ -112,8 +122,8 @@ def plot_fitness_curves():
     ]:
         ig, im, is_ = _to_arrays(imp_d)
         bg, bm, bs  = _to_arrays(bas_d)
-        _shade(ax, ig, im, is_, "#2196F3", f"Improved (n={len(IMPROVED_RUNS)})")
-        _shade(ax, bg, bm, bs, "#FF7043", f"Baseline (n={len(BASELINE_RUNS)})")
+        _shade(ax, ig, im, is_, "#2196F3", f"Evolved controller (n={len(IMPROVED_RUNS)})")
+        _shade(ax, bg, bm, bs, "#FF7043", f"Fixed controller (n={len(BASELINE_RUNS)})")
         ax.set_title(title)
         ax.set_xlabel("Generation")
         ax.set_ylabel("Displacement (voxels)")
@@ -133,7 +143,7 @@ def plot_fitness_curves():
 def plot_behavior_traits():
     n_metrics = len(GAIT_METRICS)
     fig, axes = plt.subplots(2, 3, figsize=(15, 9))
-    fig.suptitle("Behavior Traits Across Generations (Improved runs, mean ± std)", fontsize=13, fontweight="bold")
+    fig.suptitle("Behavior Traits Across Generations (evolved-controller runs, mean ± std)", fontsize=23, fontweight="bold")
     axes_flat = axes.flatten()
 
     for ax, (col, label, _) in zip(axes_flat, GAIT_METRICS):

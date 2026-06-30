@@ -69,7 +69,7 @@ def to_rgb(grid):
 
 def draw_one(ax, grid, title):
     ax.imshow(to_rgb(grid), origin="lower", interpolation="nearest")
-    ax.set_title(title, fontsize=10)
+    ax.set_title(title, fontsize=22)
     ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values():
         s.set_visible(False)
@@ -78,25 +78,28 @@ def draw_one(ax, grid, title):
 if __name__ == "__main__":
     robots = [(r, *best_robot(r)) for r in RUNS]   # (run, rid, genome, disp)
 
-    # individual images
-    for run, rid, genome, disp in robots:
+    # individual images (labelled Run 1..10)
+    for idx, (run, rid, genome, disp) in enumerate(robots, start=1):
         grid = develop(genome)
-        fig, ax = plt.subplots(figsize=(2.4, 2.4))
-        draw_one(ax, grid, f"run {run}  (fit={disp:.1f})")
+        fig, ax = plt.subplots(figsize=(2.8, 2.8))
+        draw_one(ax, grid, f"Run {idx}  (fit={disp:.1f})")
         plt.tight_layout()
-        out = OUT / f"best_run_{run}.png"
+        out = OUT / f"best_run_{idx}.png"
         plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close(fig)
         print(f"Saved: {out}")
 
     # combined 2x5 grid
-    fig, axes = plt.subplots(2, 5, figsize=(15, 6.5))
+    legend_labels = {"bone": "Bone", "fat": "Fat",
+                     "phase_muscle": "In-phase muscle",
+                     "offphase_muscle": "Offphase muscle"}
+    fig, axes = plt.subplots(2, 5, figsize=(17, 8))
     legend = [Patch(facecolor=np.array(VOXEL_TYPES_COLORS[n]) / 255.0,
-                    edgecolor="k", label=n) for n in VOXEL_TYPES]
-    for ax, (run, rid, genome, disp) in zip(axes.flatten(), robots):
-        draw_one(ax, develop(genome), f"run {run}  (fit={disp:.1f})")
-    fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=9)
-    fig.suptitle("Best robot per run (improved, 200--209)", fontsize=13, fontweight="bold")
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
+                    edgecolor="k", label=legend_labels.get(n, n)) for n in VOXEL_TYPES]
+    for idx, (ax, (run, rid, genome, disp)) in enumerate(zip(axes.flatten(), robots), start=1):
+        draw_one(ax, develop(genome), f"Run {idx}  (fit={disp:.1f})")
+    fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=18)
+    fig.suptitle("Best robot per run", fontsize=28, fontweight="bold")
+    plt.tight_layout(rect=[0, 0.06, 1, 1])
     out = OUT / "best_robots_grid.png"
     plt.savefig(out, dpi=150, bbox_inches="tight"); plt.close(fig)
     print(f"Saved: {out}")

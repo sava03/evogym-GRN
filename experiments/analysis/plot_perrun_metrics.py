@@ -17,6 +17,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 
+# Large fonts for thesis readability
+plt.rcParams.update({
+    "font.size": 20,
+    "axes.titlesize": 24,
+    "axes.labelsize": 22,
+    "xtick.labelsize": 17,
+    "ytick.labelsize": 17,
+    "legend.fontsize": 18,
+})
+
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 from parent_child_gait import collect_pairs
@@ -27,6 +37,14 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 RUNS = list(range(200, 210))
 METRICS = ["displacement", "vel_x_std", "com_y_mean", "stride_regularity"]
+
+# Human-readable display names for the metrics
+LABELS = {
+    "displacement":      "Displacement",
+    "vel_x_std":         "Velocity variability",
+    "com_y_mean":        "Body height",
+    "stride_regularity": "Stride regularity",
+}
 
 
 def compute_per_run():
@@ -55,9 +73,8 @@ def compute_per_run():
 
 def plot_metric(metric, vals):
     runs = [str(r) for r in RUNS]
-    fig, axes = plt.subplots(1, 3, figsize=(12, 3.6))
-    fig.suptitle(metric.replace("_", "\\_") if False else metric,
-                 fontsize=13, fontweight="bold")
+    fig, axes = plt.subplots(1, 3, figsize=(17, 5.5))
+    fig.suptitle(LABELS[metric], fontsize=27, fontweight="bold")
 
     panels = [
         ("ratio",  "Conservation ratio (PC / random)", 1.0, "#3F7CAC"),
@@ -68,14 +85,14 @@ def plot_metric(metric, vals):
         y = vals[key]
         ax.bar(runs, y, color=color, edgecolor="black", linewidth=0.4)
         ax.axhline(ref, color="black", linestyle="--", linewidth=1)
-        ax.set_title(title, fontsize=10)
+        ax.set_title(title)
         ax.set_xlabel("Run")
-        ax.tick_params(axis="x", labelrotation=90, labelsize=7)
+        ax.tick_params(axis="x", labelrotation=90)
         ax.grid(axis="y", alpha=0.3)
         mean = np.mean(y)
-        ax.axhline(mean, color=color, linestyle=":", linewidth=1.2,
+        ax.axhline(mean, color=color, linestyle=":", linewidth=1.5,
                    label=f"mean={mean:.3f}")
-        ax.legend(fontsize=8, loc="best")
+        ax.legend(loc="best")
 
     plt.tight_layout()
     out = OUT / f"perrun_{metric}.png"
@@ -91,8 +108,9 @@ def plot_heritability_scatter():
     df = collect_pairs(dbs)
     pc = df[df["type"] == "parent-child"]
 
-    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+    fig, axes = plt.subplots(1, 4, figsize=(20, 5.5))
     for ax, m in zip(axes, METRICS):
+        label = LABELS[m]
         pv = pc[f"parent_{m}"].values.astype(float)
         cv = pc[f"child_{m}"].values.astype(float)
         mk = ~(np.isnan(pv) | np.isnan(cv))
@@ -106,13 +124,13 @@ def plot_heritability_scatter():
                 label=f"fit (slope={slope:.2f})")
         lo, hi = min(pv.min(), cv.min()), max(pv.max(), cv.max())
         ax.plot([lo, hi], [lo, hi], "k--", linewidth=1, alpha=0.4, label="y=x")
-        ax.set_title(f"{m}\n$r={r:+.3f}$", fontsize=10)
-        ax.set_xlabel(f"parent {m}", fontsize=8)
-        ax.set_ylabel(f"child {m}", fontsize=8)
-        ax.legend(fontsize=7)
+        ax.set_title(f"{label}\n$r={r:+.3f}$")
+        ax.set_xlabel(f"parent {label}")
+        ax.set_ylabel(f"child {label}")
+        ax.legend()
 
     plt.suptitle("Parent-child heritability (all 10 improved runs)",
-                 fontsize=13, fontweight="bold")
+                 fontsize=27, fontweight="bold")
     plt.tight_layout()
     out = OUT / "heritability_scatter.png"
     plt.savefig(out, dpi=150, bbox_inches="tight")
@@ -128,6 +146,7 @@ def plot_heritability_scatter_separate():
     pc = df[df["type"] == "parent-child"]
 
     for m in METRICS:
+        label = LABELS[m]
         pv = pc[f"parent_{m}"].values.astype(float)
         cv = pc[f"child_{m}"].values.astype(float)
         mk = ~(np.isnan(pv) | np.isnan(cv))
@@ -135,17 +154,17 @@ def plot_heritability_scatter_separate():
         r, _ = stats.pearsonr(pv, cv)
         slope, intercept, *_ = stats.linregress(pv, cv)
 
-        fig, ax = plt.subplots(figsize=(4.5, 4.2))
+        fig, ax = plt.subplots(figsize=(6, 5.6))
         ax.scatter(pv, cv, alpha=0.05, s=3, color="#3F7CAC", rasterized=True)
         xl = np.array([pv.min(), pv.max()])
         ax.plot(xl, slope * xl + intercept, color="#C1666B", linewidth=2,
                 label=f"fit (slope={slope:.2f})")
         lo, hi = min(pv.min(), cv.min()), max(pv.max(), cv.max())
         ax.plot([lo, hi], [lo, hi], "k--", linewidth=1, alpha=0.4, label="y=x")
-        ax.set_title(f"{m}   $r={r:+.3f}$", fontsize=11)
-        ax.set_xlabel(f"parent {m}", fontsize=9)
-        ax.set_ylabel(f"child {m}", fontsize=9)
-        ax.legend(fontsize=8)
+        ax.set_title(f"{label}   $r={r:+.3f}$")
+        ax.set_xlabel(f"parent {label}")
+        ax.set_ylabel(f"child {label}")
+        ax.legend()
         plt.tight_layout()
         out = OUT / f"heritability_{m}.png"
         plt.savefig(out, dpi=150, bbox_inches="tight")
