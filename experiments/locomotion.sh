@@ -44,7 +44,7 @@ fitness_metric="displacement"
 
 plastic=0
 
-num_generations="100"
+num_generations="200"
 
 population_size="100"
 
@@ -61,15 +61,15 @@ mutation_prob=0.9
 
 crossover_prob=1
 
-max_voxels=125
+max_voxels=36
 
-cube_face_size=5
+cube_face_size=6
 
 evogym_steps=500
 
 # Single parallelism knob for simulation:
 # 0 = auto (uses available CPU cores), N = fixed worker count.
-evogym_num_workers=0
+evogym_num_workers=1
 
 run_simulation=1
 
