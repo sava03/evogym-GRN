@@ -62,7 +62,7 @@ class Config():
         parser.add_argument(
             "--tournament_k",
             required=False,
-            default=4,
+            default=5,
             type=int,
         )
 
